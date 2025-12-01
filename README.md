@@ -99,3 +99,15 @@ TA 1 marked Q1 for student 1
 TA 2 loaded the next exam. Correcting the exam for student 2
 TA 1 is ending the exam correcting. Final exam reached.
 ```
+## 8. Critical Section Design Discussion
+
+This program uses semaphores to control access to shared memory so that multiple TA processes can mark exams without interfering with each other. The design addresses the three requirements of the critical section problem.
+
+### Mutual Exclusion
+Mutual exclusion is handled by three binary semaphores. The semaphore `rubric_sem` ensures that only one TA updates the rubric at a time. The semaphore `mark_sem` protects the `corrected[]` array so that two TAs do not mark the same question. The semaphore `load_sem` controls access to the current exam and prevents multiple TAs from loading or resetting exam data at the same time.
+
+### Progress
+Progress is supported because semaphores are only held during the brief critical updates. When a TA finishes updating the rubric, marking state, or exam information, the semaphore is released right away. Other TAs can continue with their own work as soon as the semaphore becomes available. No TA is forced to wait unless another TA is actively inside the relevant critical section.
+
+### Bounded Waiting
+Bounded waiting is achieved because each semaphore provides access in the order that TAs request it, and the protected sections are short. When a TA waits on a semaphore, it knows that once the current holder leaves, the next waiting process will eventually enter. The marking delays occur outside the critical region. The rubric review delay happens inside the critical section, but the critical section remains bounded because each iteration performs a fixed amount of work.
